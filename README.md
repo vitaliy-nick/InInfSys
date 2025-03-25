@@ -1,6 +1,6 @@
 <<<<<<< HEAD
 # InInfSys
-RI-21cp, Pavlus Vitaliy
+RI-21cp, Pavlus Vitaliy (Add branch dev)
 =======
 # [Vue Paper Dashboard](https://cristijora.github.io/vue-paper-dashboard/)
 
