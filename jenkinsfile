@@ -1,0 +1,32 @@
+pipeline {
+    agent { label 'vitaliy' } // Весь pipeline виконується лише на агенті з міткою "vitaliy"
+
+    stages {
+        stage('Testing connection') {
+            steps {
+                sh "echo Hello from \$(hostname -I)!" // Показує IP вузла
+            }
+        }
+        stage('Getting project') {
+            steps {
+                sh "rm -rf InInfSys; git clone https://github.com/vitaliy-nick/InInfSys"
+            }
+        }
+        stage('Getting NPM') {
+            steps {
+                sh "sudo yum install -y npm"
+            }
+        }
+        stage('Installing dependencies') {
+            steps {
+                sh "npm install --prefix ./InInfSys"
+            }
+        }
+        stage('Building artifact') {
+            steps {
+                sh "npm run build --prefix ./InInfSys"
+                sh "echo Pipeline was builded in \$(date)" 
+            }
+        }
+    }
+}

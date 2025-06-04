@@ -1,0 +1,6 @@
+projectKey=lab8
+serverUrl=http://192.168.1.12:9000
+serverVersion=9.1.0.47736
+dashboardUrl=http://192.168.1.12:9000/dashboard?id=lab8
+ceTaskId=AZb9VnrLSCuAzL54xYOS
+ceTaskUrl=http://192.168.1.12:9000/api/ce/task?id=AZb9VnrLSCuAzL54xYOS
