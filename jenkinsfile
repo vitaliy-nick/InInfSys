@@ -1,32 +1,74 @@
 pipeline {
-    agent { label 'vitaliy' } // Весь pipeline виконується лише на агенті з міткою "vitaliy"
-
+    agent any
+    
     stages {
-        stage('Testing connection') {
+        stage('Checkout') {
             steps {
-                sh "echo Hello from \$(hostname -I)!" // Показує IP вузла
+                git url: 'https://github.com/vitaliy-nick/InInfSys.git', branch: 'main'
             }
         }
-        stage('Getting project') {
+        
+        stage('Installing NPM (if needed)') {
             steps {
-                sh "rm -rf InInfSys; git clone https://github.com/vitaliy-nick/InInfSys"
+               
+ sh '''
+                    if ! command -v npm &> /dev/null
+                    then
+                        sudo apt-get update
+                        sudo apt-get install -y npm
+                    else
+                        echo "npm already installed"
+                    fi
+                '''
             }
         }
-        stage('Getting NPM') {
-            steps {
-                sh "sudo yum install -y npm"
-            }
-        }
+        
         stage('Installing dependencies') {
             steps {
-                sh "npm install --prefix ./InInfSys"
+               sh 'npm install'
             }
         }
-        stage('Building artifact') {
+        
+        stage('Running dev server (test only)') {
             steps {
-                sh "npm run build --prefix ./InInfSys"
-                sh "echo Pipeline was builded in \$(date)" 
+                    sh '''
+                        nohup npm run dev > dev.log 2>&1 &
+                        DEV_PID=$!
+                        sleep 10
+                        kill $DEV_PID
+                        echo 'Dev server started and stopped successfully.'
+                    '''
+            }
+        }
+        
+        stage('SonarQube analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'Lab11_sonar_scanner'
+                    withSonarQubeEnv('SonarQube_lab11') {
+                            sh "${scannerHome}/bin/sonar-scanner"
+                    
+                    }
+                }
+            }
+        }
+        
+        stage('Wait for SonarQube Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
     }
+    
+    post {
+        success {
+            echo "Pipeline completed successfully"
+        }
+        failure {
+            echo "Pipeline failed"
+        }
+    }
 }
+
